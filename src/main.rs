@@ -1,3 +1,4 @@
+mod diagnostics;
 mod submarine;
 
 use std::str::FromStr;
@@ -7,11 +8,15 @@ use submarine::Vector;
 use anyhow::Result;
 
 fn main() {
-    const DATA: &str = include_str!("./inputs/day2task1.txt");
-    let moves = parse_directions(DATA);
-    let sub = submarine::Nav::from(moves);
-    let end = sub.follow();
-    println!("{}, {}", calc_depth_product(end.end.0, end.end.1), end.aim);
+    const DATA: &str = include_str!("./inputs/day3task1.txt");
+
+    let mut sum: i32 = 0;
+    for l in DATA.lines() {
+        let next = i32::from_str_radix(l, 2).unwrap();
+        sum ^= next;
+    }
+
+    println!("{}", sum);
 }
 
 #[allow(dead_code)]

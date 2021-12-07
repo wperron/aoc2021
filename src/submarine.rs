@@ -5,6 +5,7 @@ use anyhow::{anyhow, Result};
 #[derive(Clone, Debug)]
 pub struct Coord(pub i32, pub i32);
 
+#[allow(dead_code)]
 pub struct Vector {
     dir: Direction,
     l: i32,
@@ -42,6 +43,7 @@ impl FromStr for Direction {
     }
 }
 
+#[allow(dead_code)]
 pub struct Nav {
     directions: Vec<Vector>,
     start: Coord,
@@ -67,6 +69,7 @@ impl From<Vec<Vector>> for Nav {
 }
 
 impl Nav {
+    #[allow(dead_code)]
     pub fn follow(mut self) -> EndState {
         let mut coord = self.start.clone();
         for v in self.directions {
