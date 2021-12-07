@@ -8,16 +8,10 @@ use anyhow::Result;
 
 fn main() {
     const DATA: &str = include_str!("./inputs/day2task1.txt");
-    let lines = DATA.lines();
-    let mut moves: Vec<Vector> = vec![];
-    for l in lines {
-        let v = Vector::from_str(l).unwrap();
-        moves.push(v);
-    }
-
+    let moves = parse_directions(DATA);
     let start = Coord(0, 0);
     let end = directions::follow(moves, start).unwrap();
-    println!("{}, {}", end.0, end.1);
+    println!("{}", calc_depth_product(end.0, end.1));
 }
 
 #[allow(dead_code)]
@@ -50,4 +44,19 @@ fn moving_window(data: Vec<i32>, size: usize) -> Vec<i32> {
         res.push(w.iter().sum());
     }
     res
+}
+
+/// Day 2 - part 1
+fn parse_directions(data: &str) -> Vec<Vector> {
+    let mut moves: Vec<Vector> = vec![];
+    for l in data.lines() {
+        let v = Vector::from_str(l).unwrap();
+        moves.push(v);
+    }
+    moves
+}
+
+/// Day 2 - part 1
+fn calc_depth_product(x: i32, y: i32) -> i32 {
+    x * y
 }
