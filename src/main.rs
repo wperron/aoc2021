@@ -11,7 +11,7 @@ fn main() {
     let moves = parse_directions(DATA);
     let submarine = directions::Move::from(moves);
     let end = submarine.follow();
-    println!("{}", calc_depth_product(end.0, end.1));
+    println!("{}, {}", calc_depth_product(end.end.0, end.end.1), end.aim);
 }
 
 #[allow(dead_code)]

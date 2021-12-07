@@ -45,6 +45,7 @@ impl FromStr for Direction {
 pub struct Move {
     directions: Vec<Vector>,
     start: Coord,
+    aim: i32,
 }
 
 impl Default for Move {
@@ -52,6 +53,7 @@ impl Default for Move {
         Self {
             directions: Default::default(),
             start: Coord(0, 0),
+            aim: Default::default(),
         }
     }
 }
@@ -65,15 +67,27 @@ impl From<Vec<Vector>> for Move {
 }
 
 impl Move {
-    pub fn follow(self) -> Coord {
+    pub fn follow(mut self) -> EndState {
         let mut coord = self.start.clone();
         for v in self.directions {
             match v.dir {
-                Direction::Forward => coord.0 += v.l,
-                Direction::Up => coord.1 -= v.l,
-                Direction::Down => coord.1 += v.l,
+                Direction::Forward => {
+                    coord.0 += v.l;
+                    coord.1 += v.l * self.aim;
+                }
+                Direction::Up => self.aim -= v.l,
+                Direction::Down => self.aim += v.l,
             }
         }
-        coord
+
+        EndState {
+            end: coord,
+            aim: self.aim,
+        }
     }
+}
+
+pub struct EndState {
+    pub end: Coord,
+    pub aim: i32,
 }
