@@ -42,14 +42,38 @@ impl FromStr for Direction {
     }
 }
 
-pub fn follow(directions: Vec<Vector>, start: Coord) -> Result<Coord> {
-    let mut coord = start.clone();
-    for v in directions {
-        match v.dir {
-            Direction::Forward => coord.0 += v.l,
-            Direction::Up => coord.1 -= v.l,
-            Direction::Down => coord.1 += v.l,
+pub struct Move {
+    directions: Vec<Vector>,
+    start: Coord,
+}
+
+impl Default for Move {
+    fn default() -> Self {
+        Self {
+            directions: Default::default(),
+            start: Coord(0, 0),
         }
     }
-    Ok(coord)
+}
+
+impl From<Vec<Vector>> for Move {
+    fn from(v: Vec<Vector>) -> Self {
+        let mut m = Move::default();
+        m.directions = v;
+        m
+    }
+}
+
+impl Move {
+    pub fn follow(self) -> Coord {
+        let mut coord = self.start.clone();
+        for v in self.directions {
+            match v.dir {
+                Direction::Forward => coord.0 += v.l,
+                Direction::Up => coord.1 -= v.l,
+                Direction::Down => coord.1 += v.l,
+            }
+        }
+        coord
+    }
 }

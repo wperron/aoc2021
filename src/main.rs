@@ -2,15 +2,15 @@ mod directions;
 
 use std::str::FromStr;
 
-use directions::{Coord, Vector};
+use directions::Vector;
 
 use anyhow::Result;
 
 fn main() {
     const DATA: &str = include_str!("./inputs/day2task1.txt");
     let moves = parse_directions(DATA);
-    let start = Coord(0, 0);
-    let end = directions::follow(moves, start).unwrap();
+    let submarine = directions::Move::from(moves);
+    let end = submarine.follow();
     println!("{}", calc_depth_product(end.0, end.1));
 }
 
