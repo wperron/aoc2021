@@ -42,13 +42,13 @@ impl FromStr for Direction {
     }
 }
 
-pub struct Move {
+pub struct Nav {
     directions: Vec<Vector>,
     start: Coord,
     aim: i32,
 }
 
-impl Default for Move {
+impl Default for Nav {
     fn default() -> Self {
         Self {
             directions: Default::default(),
@@ -58,15 +58,15 @@ impl Default for Move {
     }
 }
 
-impl From<Vec<Vector>> for Move {
+impl From<Vec<Vector>> for Nav {
     fn from(v: Vec<Vector>) -> Self {
-        let mut m = Move::default();
+        let mut m = Nav::default();
         m.directions = v;
         m
     }
 }
 
-impl Move {
+impl Nav {
     pub fn follow(mut self) -> EndState {
         let mut coord = self.start.clone();
         for v in self.directions {

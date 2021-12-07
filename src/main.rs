@@ -1,16 +1,16 @@
-mod directions;
+mod submarine;
 
 use std::str::FromStr;
 
-use directions::Vector;
+use submarine::Vector;
 
 use anyhow::Result;
 
 fn main() {
     const DATA: &str = include_str!("./inputs/day2task1.txt");
     let moves = parse_directions(DATA);
-    let submarine = directions::Move::from(moves);
-    let end = submarine.follow();
+    let sub = submarine::Nav::from(moves);
+    let end = sub.follow();
     println!("{}, {}", calc_depth_product(end.end.0, end.end.1), end.aim);
 }
 
