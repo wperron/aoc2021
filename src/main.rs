@@ -7,16 +7,14 @@ use submarine::Vector;
 
 use anyhow::Result;
 
+use crate::diagnostics::Diag;
+
 fn main() {
     const DATA: &str = include_str!("./inputs/day3task1.txt");
 
-    let mut sum: i32 = 0;
-    for l in DATA.lines() {
-        let next = i32::from_str_radix(l, 2).unwrap();
-        sum ^= next;
-    }
+    let diag = Diag::<12>::from_str(DATA).unwrap();
 
-    println!("{}", sum);
+    println!("{}", diag.power_consumption());
 }
 
 #[allow(dead_code)]
@@ -52,6 +50,7 @@ fn moving_window(data: Vec<i32>, size: usize) -> Vec<i32> {
 }
 
 /// Day 2 - part 1
+#[allow(dead_code)]
 fn parse_directions(data: &str) -> Vec<Vector> {
     let mut moves: Vec<Vector> = vec![];
     for l in data.lines() {
@@ -62,6 +61,7 @@ fn parse_directions(data: &str) -> Vec<Vector> {
 }
 
 /// Day 2 - part 1
+#[allow(dead_code)]
 fn calc_depth_product(x: i32, y: i32) -> i32 {
     x * y
 }
