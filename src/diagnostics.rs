@@ -4,6 +4,7 @@ use anyhow::{format_err, Result};
 
 #[derive(Debug)]
 pub struct Diag<const N: u32> {
+    #[allow(dead_code)]
     orig: String,
     gamma: u32,
     epsilon: u32,
