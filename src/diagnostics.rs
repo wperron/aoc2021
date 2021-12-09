@@ -97,6 +97,13 @@ impl<const N: u32> FromStr for Diag<N> {
             i += 1;
         }
 
+        if nums.len() != 1 {
+            return Err(format_err!(
+                "expected exactly one number for Co2 rating, found {}",
+                nums.len()
+            ));
+        }
+
         let co2_rating = u32::from_str_radix(nums.get(0).unwrap(), 2)?;
 
         // The `!` bitwise operator flips each bit in the integer, the `&` operation
