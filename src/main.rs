@@ -13,8 +13,9 @@ fn main() {
     const DATA: &str = include_str!("./inputs/day3task1.txt");
 
     let diag = Diag::<12>::from_str(DATA).unwrap();
-
-    println!("{}", diag.power_consumption());
+    println!("{:?}", diag);
+    println!("{:?}", diag.power_consumption());
+    println!("{:?}", diag.life_support_rating());
 }
 
 #[allow(dead_code)]
