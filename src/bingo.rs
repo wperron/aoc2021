@@ -35,16 +35,24 @@ impl FromStr for Cell {
     }
 }
 
-type Row = (Cell, Cell, Cell, Cell, Cell);
-type Col = Row;
+type Row<const N: usize> = [Cell; N];
+type Col<const N: usize> = Row<N>;
 
-#[derive(Default)]
-struct Board {
-    cols: (Col, Col, Col, Col, Col),
-    rows: (Row, Row, Row, Row, Row),
+struct Board<const N: usize> {
+    cols: [Col<N>; N],
+    rows: [Row<N>; N],
 }
 
-struct Game {
-    boards: Vec<Board>,
+impl<const N: usize> Default for Board<N> {
+    fn default() -> Self {
+        Self {
+            cols: [Default::default(); N],
+            rows: [Default::default(); N],
+        }
+    }
+}
+
+struct Game<const N: usize> {
+    boards: Vec<Board<N>>,
     draw: Vec<i32>,
 }
