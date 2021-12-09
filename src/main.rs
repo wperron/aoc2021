@@ -1,3 +1,4 @@
+mod bingo;
 mod diagnostics;
 mod submarine;
 
