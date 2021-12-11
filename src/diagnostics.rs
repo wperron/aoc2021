@@ -3,8 +3,8 @@ use std::str::FromStr;
 use anyhow::{format_err, Result};
 
 #[derive(Debug)]
+#[allow(dead_code)]
 pub struct Diag<const N: u32> {
-    #[allow(dead_code)]
     orig: String,
     gamma: u32,
     epsilon: u32,
@@ -13,10 +13,12 @@ pub struct Diag<const N: u32> {
 }
 
 impl<const N: u32> Diag<N> {
+    #[allow(dead_code)]
     pub fn power_consumption(&self) -> u32 {
         self.gamma * self.epsilon
     }
 
+    #[allow(dead_code)]
     pub fn life_support_rating(&self) -> u32 {
         self.o2_rating * self.co2_rating
     }
