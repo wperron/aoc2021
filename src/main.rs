@@ -15,7 +15,12 @@ fn main() {
 
     let game: Game<5> = Game::from_str(DATA).unwrap();
     let (winner, win_draw) = game.run().unwrap();
-    println!("{:?}", winner.sum_unchecked() * *win_draw.last().unwrap());
+    println!("{}", winner);
+    println!("{:?}", win_draw);
+    println!("{:?}", winner.sum_unchecked());
+    let last = *win_draw.last().unwrap();
+    println!("{:?}", last);
+    println!("{:?}", winner.sum_unchecked() * last);
 }
 
 #[allow(dead_code)]

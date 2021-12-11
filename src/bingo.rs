@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{fmt::Display, str::FromStr};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum CellState {
@@ -9,6 +9,15 @@ pub enum CellState {
 impl Default for CellState {
     fn default() -> Self {
         Self::Unchecked
+    }
+}
+
+impl Display for CellState {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            CellState::Checked => write!(f, "{}", "⬜"),
+            CellState::Unchecked => write!(f, "{}", "✅"),
+        }
     }
 }
 
@@ -33,6 +42,12 @@ impl FromStr for Cell {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let n = i32::from_str_radix(s, 10)?;
         Ok(Cell::from(n))
+    }
+}
+
+impl Display for Cell {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} {}", self.val, self.state)
     }
 }
 
@@ -73,6 +88,18 @@ impl<const N: usize> Default for Board<N> {
             cols: [Default::default(); N],
             rows: [Default::default(); N],
         }
+    }
+}
+
+impl<const N: usize> Display for Board<N> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for row in self.rows {
+            for cell in row.inner {
+                write!(f, "{}\t", cell)?;
+            }
+            write!(f, "\n")?;
+        }
+        Ok(())
     }
 }
 
