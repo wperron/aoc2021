@@ -1,4 +1,4 @@
-use std::{fmt::Display, str::FromStr};
+use std::{fmt::Display, rc::Rc, str::FromStr};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum CellState {
@@ -107,6 +107,14 @@ impl<const N: usize> Board<N> {
     fn draw(&mut self, n: i32) {
         for r in &mut self.rows {
             for mut cell in &mut r.inner {
+                if cell.val == n {
+                    cell.state = CellState::Checked;
+                }
+            }
+        }
+
+        for c in &mut self.cols {
+            for mut cell in &mut c.inner {
                 if cell.val == n {
                     cell.state = CellState::Checked;
                 }
