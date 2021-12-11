@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-enum CellState {
+pub enum CellState {
     Checked,
     Unchecked,
 }
@@ -13,7 +13,7 @@ impl Default for CellState {
 }
 
 #[derive(Default, Copy, Clone, Debug, PartialEq, Eq)]
-struct Cell {
+pub struct Cell {
     val: i32,
     state: CellState,
 }
@@ -37,7 +37,7 @@ impl FromStr for Cell {
 }
 
 #[derive(Clone, Copy, Debug)]
-struct Row<const N: usize> {
+pub struct Row<const N: usize> {
     inner: [Cell; N],
 }
 
@@ -49,10 +49,20 @@ impl<const N: usize> Default for Row<N> {
     }
 }
 
-type Col<const N: usize> = Row<N>;
+impl<const N: usize> Row<N> {
+    fn complete(self) -> bool {
+        self.inner
+            .iter()
+            .fold(true, |comp, cell| comp && cell.state == CellState::Checked)
+    }
+}
+
+pub type Col<const N: usize> = Row<N>;
 
 #[derive(Clone, Copy, Debug)]
-struct Board<const N: usize> {
+pub struct Board<const N: usize> {
+    // TODO(wperron) add a HashMap<i32, Cell> to make lookup on the `draw` fn
+    // quicker
     cols: [Col<N>; N],
     rows: [Row<N>; N],
 }
@@ -66,10 +76,84 @@ impl<const N: usize> Default for Board<N> {
     }
 }
 
+impl<const N: usize> Board<N> {
+    fn draw(&mut self, n: i32) {
+        for r in &mut self.rows {
+            for mut cell in &mut r.inner {
+                if cell.val == n {
+                    cell.state = CellState::Checked;
+                }
+            }
+        }
+    }
+
+    fn complete(self) -> bool {
+        for row in self.rows {
+            if row.complete() {
+                return true;
+            }
+        }
+
+        for col in self.cols {
+            if col.complete() {
+                return true;
+            }
+        }
+
+        false
+    }
+
+    pub fn sum_unchecked(self) -> i32 {
+        self.rows.into_iter().fold(0, |sum, r| {
+            sum + r.inner.into_iter().fold(0, |sum, cell| match cell.state {
+                CellState::Checked => sum,
+                CellState::Unchecked => sum + cell.val,
+            })
+        })
+    }
+}
+
 #[derive(Default, Debug)]
-struct Game<const N: usize> {
+pub struct Game<const N: usize> {
     boards: Vec<Board<N>>,
     draw: Vec<i32>,
+}
+
+impl<const N: usize> Game<N> {
+    pub fn run(mut self) -> Option<(Board<N>, Vec<i32>)> {
+        let mut draw_iter = self.draw.iter();
+        for _ in 0..5 {
+            let curr = draw_iter
+                .next()
+                .expect("expected at least 5 numbers in draw");
+
+            for b in &mut self.boards {
+                b.draw(*curr);
+            }
+        }
+
+        for b in &self.boards {
+            if b.complete() {
+                return Some((b.clone(), self.draw[0..5].into()));
+            }
+        }
+
+        let mut i = 6;
+        for next in draw_iter {
+            for b in &mut self.boards {
+                b.draw(*next);
+            }
+
+            for b in &self.boards {
+                if b.complete() {
+                    return Some((b.clone(), self.draw[0..i].into()));
+                }
+            }
+            i += 1;
+        }
+
+        None
+    }
 }
 
 impl<const N: usize> FromStr for Game<N> {
@@ -118,8 +202,6 @@ impl<const N: usize> FromStr for Game<N> {
 #[cfg(test)]
 mod test {
     use std::str::FromStr;
-
-    use crate::bingo::CellState;
 
     use super::*;
 
@@ -174,5 +256,37 @@ mod test {
 
         let board = game.boards[2];
         assert_eq!(board.rows[1].inner[2], board.cols[2].inner[1]);
+    }
+
+    #[test]
+    fn test_run() {
+        let raw = "7,4,9,5,11,17,23,2,0,14,21,24,10,16,13,6,15,25,12,22,18,20,8,19,3,26,1
+
+22 13 17 11  0
+ 8  2 23  4 24
+21  9 14 16  7
+ 6 10  3 18  5
+ 1 12 20 15 19
+
+ 3 15  0  2 22
+ 9 18 13 17  5
+19  8  7 25 23
+20 11 10 24  4
+14 21 16 12  6
+
+14 21 17 24  4
+10 16 15  9 19
+18  8 23 26 20
+22 11 13  6  5
+ 2  0 12  3  7
+";
+        let game: Game<5> = Game::from_str(raw).unwrap();
+        let winner = game.run();
+        assert!(winner.is_some());
+        let winner = winner.unwrap();
+        assert_eq!(winner.0.cols[0].inner[0].val, 14);
+        assert_eq!(winner.0.sum_unchecked(), 188);
+        assert_eq!(winner.1.len(), 12);
+        assert_eq!(*winner.1.last().unwrap(), 24);
     }
 }

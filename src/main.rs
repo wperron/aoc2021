@@ -8,15 +8,14 @@ use submarine::Vector;
 
 use anyhow::Result;
 
-use crate::diagnostics::Diag;
+use crate::bingo::Game;
 
 fn main() {
-    const DATA: &str = include_str!("./inputs/day3task1.txt");
+    const DATA: &str = include_str!("./inputs/day4task1.txt");
 
-    let diag = Diag::<12>::from_str(DATA).unwrap();
-    println!("{:?}", diag);
-    println!("{:?}", diag.power_consumption());
-    println!("{:?}", diag.life_support_rating());
+    let game: Game<5> = Game::from_str(DATA).unwrap();
+    let (winner, win_draw) = game.run().unwrap();
+    println!("{:?}", winner.sum_unchecked() * *win_draw.last().unwrap());
 }
 
 #[allow(dead_code)]
