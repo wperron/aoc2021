@@ -1,4 +1,4 @@
-use std::{fmt::Display, rc::Rc, str::FromStr};
+use std::{fmt::Display, str::FromStr};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum CellState {
@@ -189,6 +189,26 @@ impl<const N: usize> Game<N> {
 
         None
     }
+
+    pub fn last_winner(mut self) -> Option<(Board<N>, Vec<i32>)> {
+        let mut remaining = self.boards.len();
+        for (i, next) in self.draw.clone().into_iter().enumerate() {
+            for b in &mut self.boards {
+                if !b.complete() {
+                    b.draw(next);
+                    if b.complete() {
+                        remaining -= 1;
+                    }
+
+                    if remaining == 0 {
+                        return Some((b.clone(), self.draw[0..i + 1].into()));
+                    }
+                }
+            }
+        }
+
+        None
+    }
 }
 
 impl<const N: usize> FromStr for Game<N> {
@@ -323,5 +343,33 @@ mod test {
         assert_eq!(winner.0.sum_unchecked(), 188);
         assert_eq!(winner.1.len(), 12);
         assert_eq!(*winner.1.last().unwrap(), 24);
+    }
+
+    #[test]
+    fn test_last_winner() {
+        let raw = "7,4,9,5,11,17,23,2,0,14,21,24,10,16,13,6,15,25,12,22,18,20,8,19,3,26,1
+
+22 13 17 11  0
+ 8  2 23  4 24
+21  9 14 16  7
+ 6 10  3 18  5
+ 1 12 20 15 19
+
+ 3 15  0  2 22
+ 9 18 13 17  5
+19  8  7 25 23
+20 11 10 24  4
+14 21 16 12  6
+
+14 21 17 24  4
+10 16 15  9 19
+18  8 23 26 20
+22 11 13  6  5
+ 2  0 12  3  7
+";
+        let game: Game<5> = Game::from_str(raw).unwrap();
+        let (last, draw) = game.last_winner().unwrap();
+        assert_eq!(last.cols[0].inner[0].val, 3);
+        assert_eq!(*draw.last().unwrap(), 13);
     }
 }
