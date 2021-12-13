@@ -1,5 +1,6 @@
 mod bingo;
 mod diagnostics;
+mod htv;
 mod submarine;
 
 use std::str::FromStr;

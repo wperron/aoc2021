@@ -72,15 +72,26 @@ impl FromStr for Vector {
 impl Vector {
     /// Expands a Vector v into a list of Coordiates covered by the Vector.
     pub fn expand(v: Vector) -> Vec<Coord> {
-        if v.from.x == v.to.x {
-            // moves on the Y axis
-        } else if v.from.y == v.to.y {
-            // moves on the X axis
+        if v.from == v.to {
+            return vec![v.from.clone()];
         }
 
         // Moving in diagonals is currently not supported, so if the Vector
         // doesn't strictly move on the X or Y axis, return an empty list.
-        vec![]
+        let mut coords = vec![];
+        if v.from.x == v.to.x {
+            let x = v.from.x;
+            for y in v.from.y..v.to.y + 1 {
+                coords.push(Coord { x, y });
+            }
+        } else if v.from.y == v.to.y {
+            let y = v.from.y;
+            for x in v.from.x..v.to.x + 1 {
+                coords.push(Coord { x, y });
+            }
+        }
+
+        coords
     }
 }
 
@@ -110,5 +121,42 @@ mod test {
         let vector = vector.unwrap();
         assert_eq!(vector.from, Coord { x: 1, y: 1 });
         assert_eq!(vector.to, Coord { x: 1, y: 5 });
+    }
+
+    #[test]
+    fn test_vector_expand() {
+        let v = Vector {
+            from: Coord { x: 1, y: 1 },
+            to: Coord { x: 1, y: 6 },
+        };
+        let coords = Vector::expand(v);
+
+        assert_eq!(coords.len(), 6);
+        for (i, c) in coords.into_iter().enumerate() {
+            assert_eq!(c.x, 1);
+            let i: i32 = i.try_into().unwrap();
+            assert_eq!(c.y, i + 1);
+        }
+
+        let v = Vector {
+            from: Coord { x: 1, y: 1 },
+            to: Coord { x: 7, y: 1 },
+        };
+        let coords = Vector::expand(v);
+
+        assert_eq!(coords.len(), 7);
+        for (i, c) in coords.into_iter().enumerate() {
+            let i: i32 = i.try_into().unwrap();
+            assert_eq!(c.y, 1);
+            assert_eq!(c.x, i + 1);
+        }
+
+        let v = Vector {
+            from: Coord { x: 1, y: 4 },
+            to: Coord { x: 7, y: 1 },
+        };
+        let coords = Vector::expand(v);
+
+        assert_eq!(coords.len(), 0);
     }
 }
