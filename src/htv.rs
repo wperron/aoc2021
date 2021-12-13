@@ -1,7 +1,7 @@
 /// Hypothermal Vents navigation system
 use std::{collections::HashMap, fmt::Display, str::FromStr};
 
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Coord {
     x: i32,
     y: i32,
@@ -95,8 +95,16 @@ impl Vector {
     }
 }
 
-pub fn intersections(_vectors: Vec<Vector>) -> HashMap<Coord, i32> {
-    todo!()
+pub fn intersections(vectors: Vec<Vector>) -> HashMap<Coord, i32> {
+    let mut map: HashMap<Coord, i32> = HashMap::new();
+
+    for v in vectors {
+        for coord in Vector::expand(v) {
+            *map.entry(coord).or_insert(0) += 1;
+        }
+    }
+
+    map
 }
 
 #[cfg(test)]
@@ -158,5 +166,20 @@ mod test {
         let coords = Vector::expand(v);
 
         assert_eq!(coords.len(), 0);
+    }
+
+    #[test]
+    fn test_intersection() {
+        let vec_a = Vector {
+            from: Coord { x: 3, y: 0 },
+            to: Coord { x: 3, y: 5 },
+        };
+        let vec_b = Vector {
+            from: Coord { x: 0, y: 3 },
+            to: Coord { x: 5, y: 3 },
+        };
+
+        let inter = intersections(vec![vec_a, vec_b]);
+        assert_eq!(inter.len(), 1);
     }
 }
