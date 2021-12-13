@@ -26,7 +26,7 @@ impl FromStr for Coord {
     type Err = anyhow::Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut parts = s.split(",");
+        let mut parts = s.split(',');
         let x = parts
             .next()
             .ok_or(std::io::Error::from(std::io::ErrorKind::InvalidData))?;
@@ -73,7 +73,7 @@ impl Vector {
     /// Expands a Vector v into a list of Coordiates covered by the Vector.
     pub fn expand(v: Vector) -> Vec<Coord> {
         if v.from == v.to {
-            return vec![v.from.clone()];
+            return vec![v.from];
         }
 
         // Moving in diagonals is currently not supported, so if the Vector
@@ -95,7 +95,7 @@ impl Vector {
     }
 }
 
-pub fn intersections(vectors: Vec<Vector>) -> HashMap<Coord, i32> {
+pub fn intersections(_vectors: Vec<Vector>) -> HashMap<Coord, i32> {
     todo!()
 }
 

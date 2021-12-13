@@ -15,8 +15,8 @@ impl Default for CellState {
 impl Display for CellState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            CellState::Checked => write!(f, "{}", "✅"),
-            CellState::Unchecked => write!(f, "{}", "⬜"),
+            CellState::Checked => write!(f, "✅"),
+            CellState::Unchecked => write!(f, "⬜"),
         }
     }
 }
@@ -68,7 +68,7 @@ impl<const N: usize> Row<N> {
     fn complete(self) -> bool {
         self.inner
             .iter()
-            .fold(true, |comp, cell| comp && cell.state == CellState::Checked)
+            .all(|cell| cell.state == CellState::Checked)
     }
 }
 
@@ -97,7 +97,7 @@ impl<const N: usize> Display for Board<N> {
             for cell in row.inner {
                 write!(f, "{}\t", cell)?;
             }
-            write!(f, "\n")?;
+            writeln!(f)?;
         }
         Ok(())
     }
@@ -169,7 +169,7 @@ impl<const N: usize> Game<N> {
 
         for b in &self.boards {
             if b.complete() {
-                return Some((b.clone(), self.draw[0..5].into()));
+                return Some((*b, self.draw[0..5].into()));
             }
         }
 
@@ -181,7 +181,7 @@ impl<const N: usize> Game<N> {
 
             for b in &self.boards {
                 if b.complete() {
-                    return Some((b.clone(), self.draw[0..i].into()));
+                    return Some((*b, self.draw[0..i].into()));
                 }
             }
             i += 1;
@@ -201,7 +201,7 @@ impl<const N: usize> Game<N> {
                     }
 
                     if remaining == 0 {
-                        return Some((b.clone(), self.draw[0..i + 1].into()));
+                        return Some((*b, self.draw[0..i + 1].into()));
                     }
                 }
             }
@@ -231,7 +231,7 @@ impl<const N: usize> FromStr for Game<N> {
         let mut i = 0;
         for line in lines {
             let line = line.trim();
-            if line.len() != 0 {
+            if !line.is_empty() {
                 for (j, num) in line.split_ascii_whitespace().enumerate() {
                     let cell = Cell::from_str(num.trim())?;
                     curr_board.rows[i].inner[j] = cell;
@@ -241,7 +241,7 @@ impl<const N: usize> FromStr for Game<N> {
             } else {
                 // an empty line denotes the end of one board and the subsequent
                 // beginning of another.
-                boards.push(curr_board.clone());
+                boards.push(curr_board);
                 curr_board = Default::default();
                 i = 0;
             }

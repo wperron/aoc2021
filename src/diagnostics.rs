@@ -30,19 +30,19 @@ impl<const N: u32> FromStr for Diag<N> {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let owned = String::from(s);
         let cap_size = N.try_into()?;
-        let bit_count = count_bits(owned.clone().lines().map(String::from).collect(), cap_size)?;
+        let bit_count = count_bits(owned.lines().map(String::from).collect(), cap_size)?;
 
         // aka: most common bits.
         let mut gamma: u32 = 0;
         for (z, o) in bit_count.clone() {
-            gamma = gamma << 1;
+            gamma <<= 1;
             if o > z {
                 gamma += 1;
             }
         }
 
         // Get the o2 Rating
-        let mut nums: Vec<String> = owned.clone().lines().map(String::from).collect();
+        let mut nums: Vec<String> = owned.lines().map(String::from).collect();
         let mut curr_count = bit_count.clone();
         let mut i = 0;
         while nums.len() > 1 {
@@ -76,7 +76,7 @@ impl<const N: u32> FromStr for Diag<N> {
         let o2_rating = u32::from_str_radix(nums.get(0).unwrap(), 2)?;
 
         // Get the Co2 Rating, similar to o2
-        let mut nums: Vec<String> = owned.clone().lines().map(String::from).collect();
+        let mut nums: Vec<String> = owned.lines().map(String::from).collect();
         let mut curr_count = bit_count;
         let mut i = 0;
         while nums.len() > 1 {
@@ -113,7 +113,7 @@ impl<const N: u32> FromStr for Diag<N> {
         // then makes sure that we're flipping all the extra unnecessary bits back
         // zero since we're using u32 but are only concerned about the smallest N bits.
         // aka: least common bits.
-        let epsilon = !gamma & ((2 as u32).pow(N) - 1);
+        let epsilon = !gamma & (2_u32.pow(N) - 1);
         Ok(Self {
             orig: owned,
             gamma,

@@ -15,7 +15,7 @@ impl FromStr for Vector {
     type Err = anyhow::Error;
 
     fn from_str(s: &str) -> Result<Self> {
-        let mut parts = s.split(" ");
+        let mut parts = s.split(' ');
         let dir = parts.next().expect("expected direction at first column");
         let dir = Direction::from_str(dir)?;
         let l = parts.next().expect("").parse::<i32>()?;
