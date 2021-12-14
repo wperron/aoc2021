@@ -95,6 +95,30 @@ impl Vector {
     }
 }
 
+pub type CartographicMap = HashMap<Coord, i32>;
+
+impl Display for CartographicMap {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let width = self
+            .into_keys()
+            .max_by(|a, b| a.x.cmp(*b.x))
+            .unwrap_or_default(0)
+            .x;
+        let height = self
+            .into_keys()
+            .max_by(|a, b| a.y.cmp(*b.y))
+            .unwrap_or_default(0)
+            .y;
+
+        let mut cols: Vec<i32> = Vec::with_capacity(width);
+        cols.resize(width, 0);
+        let mut rows: Vec<Vec<i32>> = Vec::with_capacity(height);
+        rows.resize(width, 0);
+
+        todo!()
+    }
+}
+
 pub fn intersections(vectors: Vec<Vector>) -> HashMap<Coord, i32> {
     let mut map: HashMap<Coord, i32> = HashMap::new();
 
@@ -180,6 +204,33 @@ mod test {
         };
 
         let inter = intersections(vec![vec_a, vec_b]);
-        assert_eq!(inter.len(), 1);
+        // 6 points vertically + 6 points horizontally - 1 common point.
+        assert_eq!(inter.len(), 11);
+        assert_eq!(inter.into_values().filter(|v| *v > 1).count(), 1);
+    }
+
+    #[test]
+    fn test_integration() {
+        let raw = "0,9 -> 5,9
+8,0 -> 0,8
+9,4 -> 3,4
+2,2 -> 2,1
+7,0 -> 7,4
+6,4 -> 2,0
+0,9 -> 2,9
+3,4 -> 1,4
+0,0 -> 8,8
+5,5 -> 8,2";
+        let vecs: Vec<Vector> = raw
+            .lines()
+            .map(|line| Vector::from_str(line).unwrap())
+            .collect();
+
+        println!("{:?}", vecs);
+
+        let inters = intersections(vecs);
+        println!("{:?}", inters);
+        assert_eq!(inters.len(), 20);
+        assert_eq!(inters.into_values().filter(|v| *v > 1).count(), 5);
     }
 }
