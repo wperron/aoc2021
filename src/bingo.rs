@@ -1,6 +1,7 @@
 use std::{fmt::Display, str::FromStr};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[allow(dead_code)]
 pub enum CellState {
     Checked,
     Unchecked,
@@ -64,6 +65,7 @@ impl<const N: usize> Default for Row<N> {
     }
 }
 
+#[allow(dead_code)]
 impl<const N: usize> Row<N> {
     fn complete(self) -> bool {
         self.inner
@@ -103,6 +105,7 @@ impl<const N: usize> Display for Board<N> {
     }
 }
 
+#[allow(dead_code)]
 impl<const N: usize> Board<N> {
     fn draw(&mut self, n: i32) {
         for r in &mut self.rows {
@@ -149,11 +152,13 @@ impl<const N: usize> Board<N> {
 }
 
 #[derive(Default, Debug)]
+#[allow(dead_code)]
 pub struct Game<const N: usize> {
     boards: Vec<Board<N>>,
     draw: Vec<i32>,
 }
 
+#[allow(dead_code)]
 impl<const N: usize> Game<N> {
     pub fn run(mut self) -> Option<(Board<N>, Vec<i32>)> {
         let mut draw_iter = self.draw.iter();

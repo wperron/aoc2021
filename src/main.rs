@@ -5,14 +5,16 @@ mod submarine;
 
 use std::str::FromStr;
 
-use submarine::Vector;
-
 use anyhow::Result;
 
-use crate::bingo::Game;
+use crate::htv::*;
 
 fn main() {
-    const DATA: &str = include_str!("./inputs/day4task1.txt");
+    const DATA: &str = include_str!("./inputs/day5task1.txt");
+
+    let vecs: Vec<Vector> = DATA.lines().map(|line| Vector::from_str(line).unwrap()).collect();
+    let danger = danger_zone(intersections(vecs));
+    println!("{:?}", danger);
 }
 
 #[allow(dead_code)]

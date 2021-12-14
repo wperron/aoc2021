@@ -1,5 +1,7 @@
 /// Hypothermal Vents navigation system
-use std::{collections::HashMap, fmt::Display, str::FromStr};
+use std::{collections::HashMap, fmt::Display, str::FromStr, cmp::min, cmp::max};
+
+use anyhow::Result;
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Coord {
@@ -81,41 +83,57 @@ impl Vector {
         let mut coords = vec![];
         if v.from.x == v.to.x {
             let x = v.from.x;
-            for y in v.from.y..v.to.y + 1 {
+            let lower = min(v.from.y, v.to.y);
+            let higher = max(v.from.y, v.to.y);
+            for y in lower..higher + 1 {
                 coords.push(Coord { x, y });
             }
         } else if v.from.y == v.to.y {
             let y = v.from.y;
-            for x in v.from.x..v.to.x + 1 {
+            let lower = min(v.from.x, v.to.x);
+            let higher = max(v.from.x, v.to.x);
+            for x in lower..higher + 1 {
                 coords.push(Coord { x, y });
             }
+        } else {
+            println!("{} is a diagonal", v);
         }
 
         coords
     }
 }
 
-pub type CartographicMap = HashMap<Coord, i32>;
+pub struct CartographicMap {
+    pub inner: HashMap<Coord, i32>,
+}
 
 impl Display for CartographicMap {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let width = self
+        let width: usize = self.inner.clone()
             .into_keys()
-            .max_by(|a, b| a.x.cmp(*b.x))
-            .unwrap_or_default(0)
-            .x;
-        let height = self
+            .max_by(|a, b| a.x.cmp(&b.x))
+            .unwrap_or_default()
+            .x as usize;
+        let height: usize = self.inner.clone()
             .into_keys()
-            .max_by(|a, b| a.y.cmp(*b.y))
-            .unwrap_or_default(0)
-            .y;
+            .max_by(|a, b| a.y.cmp(&b.y))
+            .unwrap_or_default()
+            .y as usize;
 
-        let mut cols: Vec<i32> = Vec::with_capacity(width);
-        cols.resize(width, 0);
-        let mut rows: Vec<Vec<i32>> = Vec::with_capacity(height);
-        rows.resize(width, 0);
+        let mut grid = vec![vec![0; width+1]; height+1];
+        self.inner.clone().into_iter().for_each(|(coord, val)| grid[coord.y as usize][coord.x as usize] = val);
 
-        todo!()
+        for row in grid {
+            for col in row {
+                let _ = match col {
+                    0 => write!(f, "."),
+                    n => write!(f, "{}", n),
+                };
+            }
+            writeln!(f)?;
+        }
+
+        Ok(())
     }
 }
 
@@ -129,6 +147,10 @@ pub fn intersections(vectors: Vec<Vector>) -> HashMap<Coord, i32> {
     }
 
     map
+}
+
+pub fn danger_zone(vectors: HashMap<Coord, i32>) -> i32 {
+    vectors.into_values().filter(|v| *v > 1).count() as i32
 }
 
 #[cfg(test)]
@@ -156,10 +178,33 @@ mod test {
     }
 
     #[test]
+    fn test_negative_vector() {
+        let raw = "0,9 -> 0,3";
+        let vector = Vector::from_str(raw);
+        assert!(vector.is_ok());
+        let vector = vector.unwrap();
+        assert_eq!(vector.from, Coord { x: 0, y: 9 });
+        assert_eq!(vector.to, Coord { x: 0, y: 3 });
+    }
+
+    #[test]
     fn test_vector_expand() {
         let v = Vector {
             from: Coord { x: 1, y: 1 },
             to: Coord { x: 1, y: 6 },
+        };
+        let coords = Vector::expand(v);
+
+        assert_eq!(coords.len(), 6);
+        for (i, c) in coords.into_iter().enumerate() {
+            assert_eq!(c.x, 1);
+            let i: i32 = i.try_into().unwrap();
+            assert_eq!(c.y, i + 1);
+        }
+
+        let v = Vector {
+            from: Coord { x: 1, y: 6 },
+            to: Coord { x: 1, y: 1 },
         };
         let coords = Vector::expand(v);
 
@@ -229,8 +274,10 @@ mod test {
         println!("{:?}", vecs);
 
         let inters = intersections(vecs);
-        println!("{:?}", inters);
-        assert_eq!(inters.len(), 20);
-        assert_eq!(inters.into_values().filter(|v| *v > 1).count(), 5);
+        assert_eq!(inters.len(), 21);
+        assert_eq!(inters.clone().into_values().filter(|v| *v > 1).count(), 5);
+
+        let danger = danger_zone(inters);
+        assert_eq!(danger, 5);
     }
 }
