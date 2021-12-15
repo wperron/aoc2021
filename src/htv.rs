@@ -1,5 +1,5 @@
 /// Hypothermal Vents navigation system
-use std::{collections::HashMap, fmt::Display, str::FromStr, cmp::min, cmp::max};
+use std::{cmp::max, cmp::min, collections::HashMap, fmt::Display, ops::Range, str::FromStr};
 
 use anyhow::Result;
 
@@ -95,6 +95,22 @@ impl Vector {
             for x in lower..higher + 1 {
                 coords.push(Coord { x, y });
             }
+        } else if (v.from.y - v.to.y).abs() == (v.from.x - v.to.x).abs() {
+            // "perfect" diagonal
+            let mut range_x = v.from.x..v.to.x + 1;
+            if range_x.is_empty() {
+                range_x = Range::from((v.to.x..v.from.x + 1).rev());
+            }
+
+            let mut range_y = v.from.y..v.to.y + 1;
+            if range_y.is_empty() {
+                range_y = (v.to.y..v.from.y + 1).rev();
+            }
+
+            coords = range_x
+                .zip(range_y)
+                .map(|(x, y)| Coord::from((x, y)))
+                .collect();
         } else {
             println!("{} is a diagonal", v);
         }
@@ -109,19 +125,26 @@ pub struct CartographicMap {
 
 impl Display for CartographicMap {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let width: usize = self.inner.clone()
+        let width: usize = self
+            .inner
+            .clone()
             .into_keys()
             .max_by(|a, b| a.x.cmp(&b.x))
             .unwrap_or_default()
             .x as usize;
-        let height: usize = self.inner.clone()
+        let height: usize = self
+            .inner
+            .clone()
             .into_keys()
             .max_by(|a, b| a.y.cmp(&b.y))
             .unwrap_or_default()
             .y as usize;
 
-        let mut grid = vec![vec![0; width+1]; height+1];
-        self.inner.clone().into_iter().for_each(|(coord, val)| grid[coord.y as usize][coord.x as usize] = val);
+        let mut grid = vec![vec![0; width + 1]; height + 1];
+        self.inner
+            .clone()
+            .into_iter()
+            .for_each(|(coord, val)| grid[coord.y as usize][coord.x as usize] = val);
 
         for row in grid {
             for col in row {
@@ -235,6 +258,22 @@ mod test {
         let coords = Vector::expand(v);
 
         assert_eq!(coords.len(), 0);
+    }
+
+    #[test]
+    fn test_expand_diagonal() {
+        let v = Vector {
+            from: Coord { x: 1, y: 5 },
+            to: Coord { x: 4, y: 2 },
+        };
+        let coords = Vector::expand(v);
+
+        assert_eq!(coords.len(), 4);
+        let mut iter = coords.into_iter();
+        assert_eq!(iter.next().unwrap(), Coord { x: 1, y: 5 });
+        assert_eq!(iter.next().unwrap(), Coord { x: 2, y: 4 });
+        assert_eq!(iter.next().unwrap(), Coord { x: 3, y: 3 });
+        assert_eq!(iter.next().unwrap(), Coord { x: 4, y: 2 });
     }
 
     #[test]
